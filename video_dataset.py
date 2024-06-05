@@ -38,7 +38,6 @@ class VideoDataset(Dataset):
             if not ret:
                 break
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  
-            frame = Image.fromarray(frame)
             frames.append(frame)
             if len(frames) == self.max_frames:
                 break
@@ -46,12 +45,12 @@ class VideoDataset(Dataset):
 
         if len(frames) < self.max_frames:
             # Pad the video to the required number of frames with black frames
-            padding = [Image.fromarray(np.zeros(self.target_size, dtype=np.uint8)) for _ in range(self.max_frames - len(frames))]
+            padding = [np.zeros(self.target_size, dtype=np.uint8) for _ in range(self.max_frames - len(frames))]
             frames.extend(padding)
 
         frames = np.array(frames)
         frames = torch.tensor(frames, dtype=torch.float32) / 255.0
-        frames = frames.unsqueeze(0)
+        frames = frames.unsqueeze(1)  # Add channel dimension (29, 1, 64, 64)
         label = torch.tensor(label, dtype=torch.long)
 
         return frames, label
